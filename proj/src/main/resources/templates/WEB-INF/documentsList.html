@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table>
+    <tr>
+        <th>NAME</th>
+        <th>DESCRIPTION</th>
+        <th>LINK</th>
+    </tr>
+    <tr th:each="document : ${documents}">
+        <td th:text="${document.getName()}"></td>
+        <td th:text="${document.getDescription()}"></td>
+        <td><a th:href="@{/document/{id}(id=${document.getId()})}">Link</a></td>
+    </tr>
+</table>
+</body>
+</html>
