@@ -1,20 +1,28 @@
 package com.derkovich.springdocuments.api;
 
 import com.derkovich.springdocuments.api.request.SearchRequest;
+import com.derkovich.springdocuments.exceptions.DocumentDoesntExistException;
+import com.derkovich.springdocuments.exceptions.FileLoadException;
 import com.derkovich.springdocuments.service.DocumentService;
 import com.derkovich.springdocuments.service.dto.Document;
 import com.derkovich.springdocuments.service.utils.FileServer;
 import com.derkovich.springdocuments.service.utils.JsonSerializers.DocumentView;
 import com.fasterxml.jackson.annotation.JsonView;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.List;
 
@@ -29,65 +37,64 @@ public class DocumentsRESTController {
     @Autowired
     private FileServer fileServer;
 
+
+    @Operation(summary = "Get list of documents")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of documents",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Document.class)) })
+    })
     @GetMapping("")
     @JsonView(DocumentView.Simple.class)
     public ResponseEntity<List<Document>> getDocuments(){
-        return ResponseEntity.ok(documentService.allDocuments());
+        return new ResponseEntity<>(documentService.allDocuments(), HttpStatus.OK);
     }
 
+    @Operation(summary = "Get specific document")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Document",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Document.class)) }),
+            @ApiResponse(responseCode = "404", description = "Invalid id supplied",
+                            content = @Content)
+    })
     @GetMapping("/{id:\\d+}")
     @JsonView(DocumentView.Detailed.class)
-    public ResponseEntity<Document> getDocument(@PathVariable(value = "id") int id){
-        return ResponseEntity.ok(documentService.findById(id));
+    public ResponseEntity<Document> getDocument(@Parameter(description = "Id of document to get") @PathVariable(value = "id") int id) throws DocumentDoesntExistException {
+        Document document = documentService.findById(id);
+        if (document != null) {
+            return new ResponseEntity<>(documentService.findById(id), HttpStatus.OK);
+        } else {
+            throw new DocumentDoesntExistException();
+        }
     }
 
+    @Operation(summary = "Search documents by description")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of documents",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Document.class)) }),
+    })
     @GetMapping("/search")
     @JsonView(DocumentView.Simple.class)
-    public ResponseEntity<List<Document>> searchDocuments(@RequestBody SearchRequest request){
-        return ResponseEntity.ok(documentService.findAllByDescriptionContaining(request.getSearch()));
+    public ResponseEntity<List<Document>> searchDocuments(@Parameter(description = "Search parameters to look for") @RequestBody SearchRequest request){
+        return new ResponseEntity<>(documentService.findAllByDescriptionContaining(request.getSearch()), HttpStatus.OK);
     }
-
-  /*  @GetMapping("/{id:\\d+}/download")
-    public void getFile(@PathVariable(value = "id") int id, HttpServletResponse response) {
-        Document document = documentService.findById(id);
-        InputStream in = null;
-        response.setHeader("Content-Disposition", "attachment; filename="+document.getName());
-        try{
-            in = new FileInputStream(new File(fileServer.getFilePath(document.getName())));
-            int c;
-            while ((c = in.read()) != -1){
-                response.getWriter().write(c);
-            }
-        }
-        catch (FileNotFoundException ex){
-            //TODO
-        }
-        catch (Exception ex){
-            ex.printStackTrace();
-        }
-        finally {
-            try {
-                if (in != null) {
-                    in.close();
-                    response.getWriter().close();
-                }
-            } catch (Exception ex){
-                ex.printStackTrace();
-            }
-        }
-    }
-*/
 
     @GetMapping("/{id:\\d+}/download")
     public ResponseEntity<Resource> downloadFile(@PathVariable(value = "id") int id,
-                                                 HttpServletRequest request) {
-        String fileName = documentService.findById(id).getName();
+                                                 HttpServletRequest request) throws DocumentDoesntExistException, FileLoadException {
+        Document document = documentService.findById(id);
+        if (document == null){
+            throw new DocumentDoesntExistException();
+        }
+        String fileName = document.getName();
         Resource resource = null;
         if(fileName !=null && !fileName.isEmpty()) {
             try {
                 resource = fileServer.loadFileAsResource(fileName);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new FileLoadException();
             }
             // Try to determine file's content type
             String contentType = null;
@@ -105,7 +112,7 @@ public class DocumentsRESTController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
         } else {
-            return ResponseEntity.notFound().build();
+            throw new DocumentDoesntExistException();
         }
     }
 
