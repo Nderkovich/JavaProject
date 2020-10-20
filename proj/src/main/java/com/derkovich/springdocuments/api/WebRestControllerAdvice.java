@@ -23,7 +23,8 @@ public class WebRestControllerAdvice {
                         UserAlreadyRegisteredException.class,
                         FileUploadException.class,
                         RatingCreationException.class,
-                        CommentCreationException.class})
+                        CommentCreationException.class,
+                        Exception.class})
     public ResponseEntity handleBadRequestException(WebRequest request, Exception ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ex.getMessage());

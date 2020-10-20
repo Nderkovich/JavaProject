@@ -1,8 +1,10 @@
 package com.derkovich.springdocuments.service.dto;
 
+import com.derkovich.springdocuments.validation.EmailUsername;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,6 +17,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Size(min = 6, max = 50)
+    @EmailUsername
     private String username;
     private String password;
 
