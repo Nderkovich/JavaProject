@@ -1,17 +1,19 @@
 package com.derkovich.springdocuments.api;
 
+import com.derkovich.springdocuments.api.request.DocUpdateRequest;
+import com.derkovich.springdocuments.repository.DocumentRepository;
 import com.derkovich.springdocuments.service.DocumentService;
 import com.derkovich.springdocuments.service.dto.Document;
 import com.derkovich.springdocuments.service.utils.FileServer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/admin/")
+@CrossOrigin
 public class AdminRESTController {
 
     @Autowired
@@ -20,16 +22,41 @@ public class AdminRESTController {
     @Autowired
     private FileServer fileServer;
 
-    //TODO if file already exists ??
     @PostMapping("/upload")
-    public String uploadDocument(@RequestParam("document")MultipartFile doc, @RequestParam("desc") String desc){
+    public ResponseEntity<Document> uploadDocument(@RequestParam("document")MultipartFile doc, @RequestParam("desc") String desc){
         Document document = new Document(doc.getOriginalFilename(), desc);
 
-        if (documentService.saveDocument(document) && fileServer.fileUpload(doc)){
-            return "OK";
+        if (fileServer.fileUpload(doc) && documentService.saveDocument(document)){
+            return new ResponseEntity<>(document, HttpStatus.OK);
         } else {
-            documentService.deleteById(documentService.findFirstByName(doc.getOriginalFilename()).getId());;
-            return "NOT OK";
+            fileServer.deleteFile(doc.getOriginalFilename());
+            throw new
+        }
+    }
+
+    @PutMapping("/document/{id:\\d+}")
+    public ResponseEntity updateDocument(@PathVariable(value = "id") int id, @RequestBody DocUpdateRequest docUpdate){
+        Document document = documentService.findById(id);
+        if (document == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body("No such document");
+        } else {
+            document.setDescription(docUpdate.getDescription());
+            documentService.saveDocument(document);
+            return ResponseEntity.ok(document);
+        }
+    }
+
+    @DeleteMapping("/document/{id:\\d+}")
+    public ResponseEntity updateDocument(@PathVariable(value = "id") int id) {
+        Document document = documentService.findById(id);
+        if (document == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("No such document");
+        } else {
+            documentService.deleteById(id);
+            fileServer.deleteFile(document.getName());
+            return ResponseEntity.ok(document);
         }
     }
 }
