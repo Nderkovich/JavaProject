@@ -20,8 +20,11 @@ public class User {
     @EmailUsername
     private String username;
     private String password;
+    @Column(name = "enabled")
+    private boolean enabled;
 
     public User(){
+        this.enabled = false;
     }
 
     @ManyToMany(cascade = CascadeType.ALL, fetch =  FetchType.EAGER)
@@ -86,5 +89,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

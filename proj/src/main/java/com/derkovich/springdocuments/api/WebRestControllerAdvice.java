@@ -24,6 +24,8 @@ public class WebRestControllerAdvice {
                         FileUploadException.class,
                         RatingCreationException.class,
                         CommentCreationException.class,
+                        WrongTokenException.class,
+                        TokenExpiredException.class,
                         Exception.class})
     public ResponseEntity handleBadRequestException(WebRequest request, Exception ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

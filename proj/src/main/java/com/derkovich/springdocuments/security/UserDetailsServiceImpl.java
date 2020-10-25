@@ -2,8 +2,10 @@ package com.derkovich.springdocuments.security;
 
 import com.derkovich.springdocuments.repository.RoleRepository;
 import com.derkovich.springdocuments.repository.UserRepository;
+import com.derkovich.springdocuments.repository.VerificationTokenRepository;
 import com.derkovich.springdocuments.service.dto.Role;
 import com.derkovich.springdocuments.service.dto.User;
+import com.derkovich.springdocuments.service.dto.VerificationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,6 +32,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    private VerificationTokenRepository tokenRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -75,5 +80,23 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return true;
+    }
+
+    public void save(User user){
+        userRepository.save(user);
+    }
+
+    public void createVerificationToken(User user, String token){
+        VerificationToken myToken = new VerificationToken(token, user);
+        tokenRepository.save(myToken);
+    }
+
+    public VerificationToken getVerificationToken(String VerificationToken){
+        return tokenRepository.findByToken(VerificationToken);
+    }
+
+    public User getUser(String verificationToken){
+        User user = tokenRepository.findByToken(verificationToken).getUser();
+        return user;
     }
 }
