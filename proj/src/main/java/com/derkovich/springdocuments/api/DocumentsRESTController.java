@@ -1,6 +1,7 @@
 package com.derkovich.springdocuments.api;
 
 import com.derkovich.springdocuments.api.request.SearchRequest;
+import com.derkovich.springdocuments.config.jwt.JwtFilter;
 import com.derkovich.springdocuments.exceptions.DocumentDoesntExistException;
 import com.derkovich.springdocuments.exceptions.FileLoadException;
 import com.derkovich.springdocuments.service.DocumentService;
@@ -36,6 +37,9 @@ public class DocumentsRESTController {
 
     @Autowired
     private FileServer fileServer;
+
+    @Autowired
+    private JwtFilter jwtFilter;
 
 
     @Operation(summary = "Get list of documents")
@@ -75,7 +79,7 @@ public class DocumentsRESTController {
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Document.class)) }),
     })
-    @GetMapping("/search")
+    @PostMapping("/search")
     @JsonView(DocumentView.Simple.class)
     public ResponseEntity<List<Document>> searchDocuments(@Parameter(description = "Search parameters to look for") @RequestBody SearchRequest request){
         return new ResponseEntity<>(documentService.findAllByDescriptionContaining(request.getSearch()), HttpStatus.OK);

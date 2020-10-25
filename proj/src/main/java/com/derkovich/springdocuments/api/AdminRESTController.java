@@ -3,7 +3,6 @@ package com.derkovich.springdocuments.api;
 import com.derkovich.springdocuments.api.request.DocUpdateRequest;
 import com.derkovich.springdocuments.exceptions.DocumentDoesntExistException;
 import com.derkovich.springdocuments.exceptions.FileUploadException;
-import com.derkovich.springdocuments.repository.DocumentRepository;
 import com.derkovich.springdocuments.service.DocumentService;
 import com.derkovich.springdocuments.service.dto.Document;
 import com.derkovich.springdocuments.service.utils.FileServer;
