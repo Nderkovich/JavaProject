@@ -8,6 +8,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @RestControllerAdvice
 public class WebRestControllerAdvice {
 
@@ -30,6 +36,20 @@ public class WebRestControllerAdvice {
     public ResponseEntity handleBadRequestException(WebRequest request, Exception ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    ResponseEntity<Set<String>> handleConstraintViolation(ConstraintViolationException e) {
+        Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
+
+        Set<String> messages = new HashSet<>(constraintViolations.size());
+        messages.addAll(constraintViolations.stream()
+                .map(constraintViolation -> String.format("%s value %s", constraintViolation.getPropertyPath(),
+                        constraintViolation.getMessage()))
+                .collect(Collectors.toList()));
+
+        return new ResponseEntity<>(messages, HttpStatus.BAD_REQUEST);
+
     }
 
     @ExceptionHandler(NotYourCommentException.class)

@@ -24,7 +24,7 @@ public class AdminRESTController {
     private FileServer fileServer;
 
     @PostMapping("/upload")
-    public ResponseEntity<Document> uploadDocument(@RequestParam("document")MultipartFile doc, @RequestParam("desc") String desc) throws FileUploadException {
+    public ResponseEntity<Document> uploadDocument(@RequestPart("document")MultipartFile doc, @RequestPart("desc") String desc) throws FileUploadException {
         Document document = new Document(doc.getOriginalFilename(), desc);
 
         if (fileServer.fileUpload(doc) && documentService.saveDocument(document)){

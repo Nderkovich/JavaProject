@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 import java.util.Calendar;
 
 
@@ -47,13 +48,13 @@ public class AuthenticationRESTController {
         if (u != null) {
             throw new UserAlreadyRegisteredException();
         }
-        User user = new User();
-        user.setPassword(registrationRequest.getPassword());
-        user.setUsername(registrationRequest.getUsername());
-        userService.saveUser(user);
-        System.out.println("PUBLISH");
-        eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
-        return ResponseEntity.ok("User successfully registered");
+            User user = new User();
+            user.setPassword(registrationRequest.getPassword());
+            user.setUsername(registrationRequest.getUsername());
+            userService.saveUser(user);
+            System.out.println("PUBLISH");
+            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
+            return ResponseEntity.ok("User successfully registered");
     }
 
     @PostMapping("/login")

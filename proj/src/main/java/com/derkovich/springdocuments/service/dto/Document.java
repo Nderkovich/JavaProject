@@ -33,12 +33,12 @@ public class Document {
     }
 
     @JsonIgnore
-    @OneToMany(mappedBy = "document")
+    @OneToMany(mappedBy = "document", cascade = CascadeType.ALL)
     private Set<Rating> ratings;
 
     @JsonManagedReference
-    @JsonView(DocumentView.Detailed.class)
-    @OneToMany(mappedBy = "document")
+    @JsonView({DocumentView.Detailed.class})
+    @OneToMany(mappedBy = "document", cascade = CascadeType.ALL)
     private Set<Comment> comments;
 
     @Transient

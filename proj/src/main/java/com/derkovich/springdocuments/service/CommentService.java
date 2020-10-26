@@ -5,6 +5,7 @@ import com.derkovich.springdocuments.service.dto.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -31,6 +32,7 @@ public class CommentService {
         return true;
     }
 
+    @Transactional
     public void deleteCommentById(Integer id){
         commentRepository.deleteCommentById(id);
     }

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
+import java.net.URLConnection;
 import java.util.List;
 
 @RestController
@@ -87,7 +88,7 @@ public class DocumentsRESTController {
 
     @GetMapping("/{id:\\d+}/download")
     public ResponseEntity<Resource> downloadFile(@PathVariable(value = "id") int id,
-                                                 HttpServletRequest request) throws DocumentDoesntExistException, FileLoadException {
+                                                 HttpServletRequest request) throws DocumentDoesntExistException, FileLoadException, IOException {
         Document document = documentService.findById(id);
         if (document == null){
             throw new DocumentDoesntExistException();
@@ -112,8 +113,9 @@ public class DocumentsRESTController {
                 contentType = "application/octet-stream";
             }
             return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition,X-Suggested-Filename")
+                    .contentType(MediaType.parseMediaType(contentType))
                     .body(resource);
         } else {
             throw new DocumentDoesntExistException();
