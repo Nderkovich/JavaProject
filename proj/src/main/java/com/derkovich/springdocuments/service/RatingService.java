@@ -25,6 +25,7 @@ public class RatingService {
         Rating ratingFromDB = ratingRepository.findFirstByDocument_IdAndAndUser_Id(rating.getDocument().getId(), rating.getUser().getId());
         if (ratingFromDB != null){
             ratingFromDB.setRating(rating.getRating());
+            ratingRepository.save(ratingFromDB);
             return true;
         }
         else {

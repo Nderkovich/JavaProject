@@ -1,7 +1,11 @@
 package com.derkovich.springdocuments.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.context.support.XmlWebApplicationContext;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import javax.servlet.MultipartConfigElement;
@@ -16,6 +20,9 @@ public class MainWebAppInitializer implements WebApplicationInitializer {
     @Override
     public void onStartup(ServletContext sc) throws ServletException {
 
+        XmlWebApplicationContext context = new XmlWebApplicationContext();
+        context.setConfigLocation("applicationContext.xml");
+        context.setServletContext(sc);
         ServletRegistration.Dynamic appServlet = sc.addServlet("mvc", new DispatcherServlet(
                 new GenericWebApplicationContext()));
 

@@ -1,9 +1,11 @@
 package com.derkovich.springdocuments.service.dto;
 
+import com.derkovich.springdocuments.service.utils.JsonSerializers.DocumentView;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "user_comments")
@@ -11,9 +13,12 @@ public class Comment {
     @Id
     @Column(name = "comment_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonView(DocumentView.Detailed.class)
     private Integer id;
 
     @Column(name = "comment_text")
+    @JsonView(DocumentView.Detailed.class)
+    @Size(min = 3)
     private String text;
 
     @JsonBackReference
@@ -25,6 +30,14 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Transient
+    @JsonView(DocumentView.Detailed.class)
+    private Integer userId;
+
+    public Integer getUserId(){
+        return this.user.getId();
+    }
 
     public Comment() {
     }

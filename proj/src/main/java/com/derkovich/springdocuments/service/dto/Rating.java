@@ -3,6 +3,10 @@ package com.derkovich.springdocuments.service.dto;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "user_rating")
@@ -12,6 +16,8 @@ public class Rating {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Min(value = 0, message = "Rating cant be less than zero")
+    @Max(value = 5, message = "Rating cant be more than 5")
     private Integer rating;
 
     @JsonManagedReference

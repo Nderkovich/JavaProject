@@ -34,6 +34,10 @@ public class DocumentService {
         return documentRepository.findFirstByName(name);
     }
 
+    public List<Document> findAllByDescriptionContaining(String searchQuery){
+        return documentRepository.findAllByDescriptionContaining(searchQuery);
+    }
+
     public void deleteById(Integer id){
         documentRepository.deleteById(id);
     }

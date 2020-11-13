@@ -1,9 +1,11 @@
 package com.derkovich.springdocuments.service.dto;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.derkovich.springdocuments.validation.EmailUsername;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,10 +16,15 @@ public class User {
     @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Size(min = 6, max = 50)
+    @EmailUsername
     private String username;
     private String password;
+    @Column(name = "enabled")
+    private boolean enabled;
 
     public User(){
+        this.enabled = false;
     }
 
     @ManyToMany(cascade = CascadeType.ALL, fetch =  FetchType.EAGER)
@@ -82,5 +89,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
