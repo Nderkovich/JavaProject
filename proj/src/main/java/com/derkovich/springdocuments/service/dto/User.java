@@ -19,7 +19,6 @@ public class User {
     @Size(min = 6, max = 50)
     @EmailUsername
     private String username;
-    @Size(min = 6, max = 50)
     private String password;
     @Column(name = "enabled")
     private boolean enabled;

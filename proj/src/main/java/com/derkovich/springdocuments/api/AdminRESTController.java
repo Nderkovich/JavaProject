@@ -6,6 +6,17 @@ import com.derkovich.springdocuments.exceptions.FileUploadException;
 import com.derkovich.springdocuments.service.DocumentService;
 import com.derkovich.springdocuments.service.dto.Document;
 import com.derkovich.springdocuments.service.utils.FileServer;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +35,8 @@ public class AdminRESTController {
     private FileServer fileServer;
 
     @PostMapping("/upload")
-    public ResponseEntity<Document> uploadDocument(@RequestPart("document")MultipartFile doc, @RequestPart("desc") String desc) throws FileUploadException {
+    @Operation(summary = "admin", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<Document> uploadDocument(@RequestHeader(name = "Authorization") String authorization,@RequestPart("document")MultipartFile doc, @RequestPart("desc") String desc) throws FileUploadException {
         Document document = new Document(doc.getOriginalFilename(), desc);
 
         if (fileServer.fileUpload(doc) && documentService.saveDocument(document)){
@@ -36,6 +48,7 @@ public class AdminRESTController {
     }
 
     @PutMapping("/document/{id:\\d+}")
+    @Operation(summary = "admin", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Document> updateDocument(@PathVariable(value = "id") int id, @RequestBody DocUpdateRequest docUpdate) throws DocumentDoesntExistException {
         Document document = documentService.findById(id);
         if (document == null){
@@ -47,8 +60,9 @@ public class AdminRESTController {
         }
     }
 
-    @DeleteMapping("/document/{id:\\d+}")
-    public ResponseEntity<Document> updateDocument(@PathVariable(value = "id") int id) throws DocumentDoesntExistException {
+    @DeleteMapping(value = "/document/{id:\\d+}", headers = {"Authorization"})
+    @Operation(summary = "admin", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<Document> deleteDocument(@PathVariable(value = "id") int id) throws DocumentDoesntExistException {
         Document document = documentService.findById(id);
         if (document == null){
             throw new DocumentDoesntExistException();
